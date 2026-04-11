@@ -17,8 +17,8 @@ TUKEY_FILES = {
     'AvgRPM':      'tukey_avgRPM.csv',
     'AvgThrottle': 'tukey_avgthrottle.csv',
     'MaxSpeed':    'tukey_maxspeed.csv',
-    'Sector1':     'tukey_sector1.csv',
-    'Sector2':     'tukey_sector2.csv',
+    'Sector1':     'tukey_sector2.csv',
+    'Sector2':     'tukey_sector3.csv',
 }
 
 HTML = """<!DOCTYPE html>
@@ -220,11 +220,15 @@ def index():
     return HTML
 
 
+def get_driver_cols(df):
+    """Return list of driver codes extracted from Driver_XXX dummy columns."""
+    return [c.replace("Driver_", "") for c in df.columns if c.startswith("Driver_")]
+
 @app.route("/api/drivers")
 def api_drivers():
     try:
         df = pd.read_csv(os.path.join(DATA_FOLDER, "f1_deployment_data.csv"))
-        drivers = sorted(df['Driver'].dropna().unique().tolist()) if 'Driver' in df.columns else []
+        drivers = sorted(get_driver_cols(df))
         return jsonify({"drivers": drivers})
     except Exception as e:
         return jsonify({"drivers": [], "error": str(e)})
@@ -258,9 +262,28 @@ def api_regression():
     try:
         df = pd.read_csv(os.path.join(DATA_FOLDER, "f1_deployment_data.csv"))
 
-        plot_df = df[df['Driver'] == driver_filter].copy() if driver_filter else df.copy()
-        if plot_df.empty:
-            return jsonify({"error": f"No data found for driver: {driver_filter}"})
+        driver_cols = [c for c in df.columns if c.startswith("Driver_")]
+
+        # Filter rows where the selected driver's dummy column == True/1
+        if driver_filter:
+            col = f"Driver_{driver_filter}"
+            if col not in df.columns:
+                return jsonify({"error": f"Column '{col}' not found in CSV."})
+            plot_df = df[df[col].astype(str).str.upper().isin(['TRUE', '1', 'YES'])].copy()
+            if plot_df.empty:
+                return jsonify({"error": f"No rows found where {col} is True."})
+        else:
+            plot_df = df.copy()
+
+        # Derive a human-readable driver label per row from dummy columns
+        def row_driver(r):
+            for c in driver_cols:
+                if str(r[c]).upper() in ('TRUE', '1', 'YES'):
+                    return c.replace("Driver_", "")
+            return "UNK"
+
+        plot_df = plot_df.copy()
+        plot_df['_driver_label'] = plot_df.apply(row_driver, axis=1)
 
         actual    = plot_df['LapTime'].values
         predicted = plot_df['Predicted_LapTime'].values
@@ -307,9 +330,9 @@ def api_regression():
 
         # Preview table
         preview = []
-        for _, row in plot_df[['Driver', 'LapTime', 'Predicted_LapTime']].head(15).iterrows():
+        for _, row in plot_df.head(15).iterrows():
             preview.append({
-                "driver":    row['Driver'],
+                "driver":    row['_driver_label'],
                 "actual":    round(row['LapTime'], 3),
                 "predicted": round(row['Predicted_LapTime'], 3),
                 "error":     round(row['Predicted_LapTime'] - row['LapTime'], 4)
