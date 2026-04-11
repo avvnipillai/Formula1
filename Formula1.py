@@ -17,8 +17,8 @@ TUKEY_FILES = {
     'AvgRPM':      'tukey_avgRPM.csv',
     'AvgThrottle': 'tukey_avgthrottle.csv',
     'MaxSpeed':    'tukey_maxspeed.csv',
-    'Sector1':     'tukey_sector2.csv',
-    'Sector2':     'tukey_sector3.csv',
+    'Sector1':     'tukey_sector1.csv',
+    'Sector2':     'tukey_sector2.csv',
 }
 
 HTML = """<!DOCTYPE html>
@@ -71,6 +71,7 @@ HTML = """<!DOCTYPE html>
   .sec{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--red);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
   .card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:20px;}
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .one-col{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;}
   .card img{width:100%;border-radius:4px;display:block;}
 
   .table-wrap{overflow-x:auto;}
@@ -189,6 +190,8 @@ async function loadRegression(){
     <td>${r.actual}</td><td>${r.predicted}</td>
     <td style="color:${Math.abs(r.error)>1?'var(--accent)':'var(--green)'}">${r.error}</td>
   </tr>`).join('');
+  const histHtml = (driver==='') ? `<div class="card"><div class="sec">Error Distribution</div><img src="data:image/png;base64,${d.hist}"/></div>` : '';
+  const wrapCls  = (driver==='') ? 'two-col' : 'one-col';
   el.innerHTML=`
     <div class="metrics-row">
       <div class="metric-card"><div class="metric-val">${d.rmse}</div><div class="metric-lbl">RMSE</div></div>
@@ -196,8 +199,8 @@ async function loadRegression(){
       <div class="metric-card"><div class="metric-val">${d.mae}</div><div class="metric-lbl">MAE</div></div>
       <div class="metric-card"><div class="metric-val">${d.mean_error}</div><div class="metric-lbl">Mean Error</div></div>
     </div>
-    <div class="two-col">
-      <div class="card"><div class="sec">Error Distribution</div><img src="data:image/png;base64,${d.hist}"/></div>
+    <div class="${wrapCls}">
+      ${histHtml}
       <div class="card"><div class="sec">Predicted vs Actual Lap Times</div><img src="data:image/png;base64,${d.lineplot}"/></div>
     </div>
     <div class="card">
