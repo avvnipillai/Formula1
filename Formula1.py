@@ -27,30 +27,69 @@ HTML = """<!DOCTYPE html>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>F1 Analytics · Silverstone 2024</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
-  :root{--red:#e10600;--dark:#0d0d0d;--card:#161616;--border:#2a2a2a;--text:#f0f0f0;--muted:#666;--accent:#ff4444;--green:#00d2a0;--blue:#4da6ff;}
+  :root{--red:#e10600;--dark:#080808;--card:#131313;--border:#252525;--text:#f0f0f0;--muted:#555;--accent:#ff4444;--green:#00d2a0;--blue:#4da6ff;--gold:#ffd700;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--dark);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
 
-  header{background:#0f0f0f;border-bottom:3px solid var(--red);padding:16px 36px;display:flex;align-items:center;justify-content:space-between;}
-  .logo{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:26px;letter-spacing:3px;color:var(--red);}
+  /* ── HEADER ── */
+  header{background:#0a0a0a;border-bottom:3px solid var(--red);padding:0 36px;display:flex;align-items:center;justify-content:space-between;height:58px;position:relative;overflow:hidden;}
+  header::before{content:'';position:absolute;left:0;top:0;width:100%;height:100%;background:linear-gradient(90deg,rgba(225,6,0,.07) 0%,transparent 60%);pointer-events:none;}
+  .logo{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:28px;letter-spacing:4px;color:var(--red);z-index:1;}
   .logo span{color:#fff;}
-  .race-badge{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;border-left:2px solid var(--red);padding-left:14px;}
-  .race-badge strong{color:#bbb;display:block;font-size:13px;letter-spacing:.5px;margin-bottom:2px;}
+  .header-right{display:flex;align-items:center;gap:22px;z-index:1;}
+  .race-meta{text-align:right;}
+  .race-meta .r1{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;color:#e0e0e0;}
+  .race-meta .r2{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px;}
+  .flag{font-size:22px;}
 
-  nav{display:flex;border-bottom:2px solid var(--border);padding:0 36px;background:#0f0f0f;}
+  /* ── HERO BANNER ── */
+  .hero{background:#0c0c0c;border-bottom:1px solid var(--border);padding:0;overflow:hidden;position:relative;}
+  .hero-track{width:100%;height:130px;position:relative;background:linear-gradient(180deg,#0c0c0c 0%,#0f0f0f 100%);}
+
+  /* dashed track line */
+  .track-line{position:absolute;bottom:42px;left:0;width:100%;height:2px;background:repeating-linear-gradient(90deg,#333 0,#333 18px,transparent 18px,transparent 34px);}
+
+  /* animated F1 car (pure CSS/SVG) */
+  .car-wrap{position:absolute;bottom:30px;animation:drive 7s linear infinite;}
+  @keyframes drive{0%{left:-220px}100%{left:calc(100% + 30px)}}
+
+  /* speed blur streaks behind car */
+  .streak{position:absolute;bottom:36px;height:3px;border-radius:2px;animation:streak 7s linear infinite;}
+  .streak:nth-child(1){width:120px;background:linear-gradient(90deg,transparent,rgba(225,6,0,.5));animation-delay:-.1s;bottom:40px;}
+  .streak:nth-child(2){width:80px;background:linear-gradient(90deg,transparent,rgba(255,100,0,.3));animation-delay:-.05s;bottom:35px;}
+  .streak:nth-child(3){width:60px;background:linear-gradient(90deg,transparent,rgba(255,200,0,.2));bottom:43px;}
+  @keyframes streak{0%{left:-230px}100%{left:calc(100% + 20px)}}
+
+  /* podium cards inside hero */
+  .podium-row{display:flex;gap:0;justify-content:center;align-items:stretch;padding:18px 36px 16px;}
+  .podium-card{flex:1;max-width:340px;background:var(--card);border:1px solid var(--border);padding:14px 20px;position:relative;transition:transform .2s;}
+  .podium-card:hover{transform:translateY(-2px);}
+  .podium-card:first-child{border-radius:8px 0 0 8px;border-right:none;border-top:3px solid var(--gold);}
+  .podium-card:nth-child(2){border-left:1px solid #333;border-right:1px solid #333;border-top:3px solid #bbb;}
+  .podium-card:last-child{border-radius:0 8px 8px 0;border-left:none;border-top:3px solid #cd7f32;}
+  .p-icon{font-size:20px;margin-bottom:4px;}
+  .p-pos{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+  .p-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:.5px;color:#fff;line-height:1.1;}
+  .p-team{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.5px;}
+  .p-detail{font-size:11px;color:var(--green);margin-top:5px;font-weight:500;}
+  .p-pos-num{position:absolute;top:12px;right:16px;font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:800;color:rgba(255,255,255,.04);line-height:1;}
+
+  /* ── NAV ── */
+  nav{display:flex;border-bottom:2px solid var(--border);padding:0 36px;background:#0a0a0a;}
   .tab{padding:13px 28px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;}
   .tab.active{color:var(--red);border-bottom-color:var(--red);}
   .tab:hover:not(.active){color:#ccc;}
 
+  /* ── MAIN ── */
   main{padding:28px 36px;max-width:1300px;margin:0 auto;}
   .panel{display:none;animation:fadeIn .2s ease;} .panel.active{display:block;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 
   .controls{display:flex;align-items:center;gap:14px;margin-bottom:26px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px 18px;}
   .ctrl-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
-  select{background:#1e1e1e;color:var(--text);border:1px solid var(--border);border-radius:4px;padding:7px 14px;font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;outline:none;transition:border-color .2s;min-width:160px;}
+  select{background:#1a1a1a;color:var(--text);border:1px solid var(--border);border-radius:4px;padding:7px 14px;font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;outline:none;transition:border-color .2s;min-width:160px;}
   select:focus,select:hover{border-color:var(--red);}
   button{background:var(--red);color:#fff;border:none;border-radius:4px;padding:8px 20px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:background .2s;}
   button:hover{background:#c00;}
@@ -76,32 +115,110 @@ HTML = """<!DOCTYPE html>
 
   .table-wrap{overflow-x:auto;}
   table{width:100%;border-collapse:collapse;font-size:13px;}
-  thead tr{background:#1d1d1d;}
+  thead tr{background:#1a1a1a;}
   th{padding:9px 13px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
-  td{padding:9px 13px;border-bottom:1px solid #1c1c1c;}
+  td{padding:9px 13px;border-bottom:1px solid #1a1a1a;}
   tr:last-child td{border-bottom:none;}
-  tr:hover td{background:#191919;}
+  tr:hover td{background:#181818;}
   .badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:600;}
   .badge.yes{background:rgba(225,6,0,.18);color:var(--accent);}
-  .badge.no{background:#222;color:var(--muted);}
+  .badge.no{background:#1e1e1e;color:var(--muted);}
 
   .loader{text-align:center;padding:52px;color:var(--muted);font-size:11px;letter-spacing:3px;text-transform:uppercase;}
   .err{color:var(--accent);padding:20px;font-size:13px;background:rgba(225,6,0,.07);border-radius:6px;border:1px solid rgba(225,6,0,.2);}
 
-  @media(max-width:720px){
-    .stats-row,.metrics-row{grid-template-columns:1fr 1fr;}
-    .two-col{grid-template-columns:1fr;}
-    header,nav,main{padding-left:14px;padding-right:14px;}
-  }
+  @media(max-width:900px){.podium-row{flex-direction:column;align-items:stretch;}.podium-card{max-width:100%;border-radius:6px!important;border-right:1px solid var(--border)!important;border-left:1px solid var(--border)!important;margin-bottom:8px;}}
+  @media(max-width:720px){.stats-row,.metrics-row{grid-template-columns:1fr 1fr;}.two-col{grid-template-columns:1fr;}header,nav,main,.podium-row{padding-left:14px;padding-right:14px;}}
 </style>
 </head>
 <body>
 
+<!-- ── HEADER ── -->
 <header>
   <div class="logo">F1<span>·</span>ANALYTICS</div>
-  <div class="race-badge"><strong>Silverstone 2024</strong>Statistical Race Dashboard</div>
+  <div class="header-right">
+    <div class="race-meta">
+      <div class="r1">British Grand Prix 2024</div>
+      <div class="r2">Silverstone · 7 July · 52 Laps</div>
+    </div>
+    <div class="flag">🇬🇧</div>
+  </div>
 </header>
 
+<!-- ── HERO BANNER ── -->
+<div class="hero">
+  <!-- animated car track -->
+  <div class="hero-track">
+    <div class="track-line"></div>
+    <!-- speed streaks -->
+    <div class="streak"></div>
+    <div class="streak"></div>
+    <div class="streak"></div>
+    <!-- SVG F1 car -->
+    <div class="car-wrap">
+      <svg width="200" height="52" viewBox="0 0 200 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- rear wing -->
+        <rect x="2" y="10" width="18" height="4" rx="1" fill="#cc0000"/>
+        <rect x="4" y="8" width="14" height="3" rx="1" fill="#e10600"/>
+        <!-- body -->
+        <path d="M18 22 Q30 14 70 13 L130 13 Q160 13 175 20 L182 26 Q175 32 130 33 L70 33 Q30 33 18 28 Z" fill="#e10600"/>
+        <!-- cockpit surround / halo -->
+        <path d="M80 13 Q100 6 120 13" stroke="#111" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <rect x="88" y="7" width="24" height="7" rx="3" fill="#222"/>
+        <!-- nose -->
+        <path d="M175 20 L195 24 L182 26 Z" fill="#cc0000"/>
+        <!-- sidepods -->
+        <rect x="60" y="28" width="60" height="7" rx="2" fill="#c00000"/>
+        <!-- front wing -->
+        <rect x="178" y="26" width="20" height="3" rx="1" fill="#cc0000"/>
+        <rect x="176" y="22" width="22" height="2" rx="1" fill="#aaa"/>
+        <!-- rear wheel -->
+        <circle cx="32" cy="36" r="10" fill="#111" stroke="#444" stroke-width="2"/>
+        <circle cx="32" cy="36" r="5" fill="#333"/>
+        <circle cx="32" cy="36" r="2" fill="#555"/>
+        <!-- front wheel -->
+        <circle cx="162" cy="36" r="10" fill="#111" stroke="#444" stroke-width="2"/>
+        <circle cx="162" cy="36" r="5" fill="#333"/>
+        <circle cx="162" cy="36" r="2" fill="#555"/>
+        <!-- silver accents -->
+        <rect x="90" y="20" width="30" height="2" rx="1" fill="rgba(255,255,255,0.15)"/>
+        <!-- exhaust glow -->
+        <ellipse cx="12" cy="24" rx="6" ry="3" fill="rgba(255,120,0,0.4)"/>
+        <ellipse cx="8" cy="24" rx="4" ry="2" fill="rgba(255,200,0,0.3)"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- podium results -->
+  <div class="podium-row">
+    <div class="podium-card">
+      <div class="p-pos-num">1</div>
+      <div class="p-icon">🏆</div>
+      <div class="p-pos">Race Winner</div>
+      <div class="p-name">Lewis Hamilton</div>
+      <div class="p-team">Mercedes · #44</div>
+      <div class="p-detail">104th career victory · Record 9th British GP win</div>
+    </div>
+    <div class="podium-card">
+      <div class="p-pos-num">2</div>
+      <div class="p-icon">🥈</div>
+      <div class="p-pos">2nd Place</div>
+      <div class="p-name">Max Verstappen</div>
+      <div class="p-team">Red Bull Racing · #1</div>
+      <div class="p-detail" style="color:#bbb">Championship leader at time of race</div>
+    </div>
+    <div class="podium-card">
+      <div class="p-pos-num">⚡</div>
+      <div class="p-icon">⚡</div>
+      <div class="p-pos">Fastest Lap</div>
+      <div class="p-name">Carlos Sainz</div>
+      <div class="p-team">Ferrari · #55</div>
+      <div class="p-detail">1:28.293 · Lap 52 · 240.2 km/h</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── NAV TABS ── -->
 <nav>
   <div class="tab active" onclick="switchTab('tukey',this)">Tukey / ANOVA</div>
   <div class="tab" onclick="switchTab('regression',this)">Lap Time Prediction</div>
