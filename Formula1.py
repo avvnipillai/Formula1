@@ -132,10 +132,6 @@ HTML = r"""<!DOCTYPE html>
   .ctrl-divider{width:1px;height:28px;background:var(--border);margin:0 4px;}
   .ctrl-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2.5px;
     text-transform:uppercase;color:var(--muted);}
-  /* compound group hidden by default, shown only for All Drivers */
-  #compound-group{display:flex;align-items:center;gap:10px;}
-  #compound-group.hidden{display:none;}
-
   select{background:#0d0d1a;color:var(--text);border:1px solid var(--border);border-radius:5px;
     padding:7px 14px;font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;outline:none;
     transition:border-color .2s,box-shadow .2s;min-width:160px;
@@ -143,19 +139,6 @@ HTML = r"""<!DOCTYPE html>
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234a4a6a'/%3E%3C/svg%3E");
     background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;}
   select:focus,select:hover{border-color:var(--steel);box-shadow:0 0 0 2px rgba(168,200,232,.1);}
-
-  .tyre-group{display:flex;gap:8px;}
-  .tyre-btn{padding:6px 16px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;
-    font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;
-    border:1px solid transparent;transition:all .2s;}
-  .tyre-btn.all{background:#1a1a2e;color:var(--muted);border-color:var(--border);}
-  .tyre-btn.all.active,.tyre-btn.all:hover{background:#252535;color:#ccc;border-color:#444;}
-  .tyre-btn.soft{background:rgba(255,221,68,.08);color:var(--soft);border-color:rgba(255,221,68,.2);}
-  .tyre-btn.soft.active{background:rgba(255,221,68,.18);border-color:var(--soft);
-    box-shadow:0 0 10px rgba(255,221,68,.2);}
-  .tyre-btn.medium{background:rgba(232,232,232,.06);color:#d8d8d8;border-color:rgba(232,232,232,.15);}
-  .tyre-btn.medium.active{background:rgba(232,232,232,.14);border-color:#d8d8d8;
-    box-shadow:0 0 10px rgba(232,232,232,.12);}
 
   button.run-btn{background:linear-gradient(135deg,var(--red),#b00000);color:#fff;border:none;
     border-radius:5px;padding:8px 22px;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;
@@ -300,14 +283,14 @@ HTML = r"""<!DOCTYPE html>
 </div>
 
 <nav>
-  <div class="tab active" onclick="switchTab('tukey',this)">Tukey / ANOVA</div>
-  <div class="tab" onclick="switchTab('regression',this)">Lap Time Prediction</div>
+  <div class="tab active" onclick="switchTab('regression',this)">Lap Time Prediction</div>
+  <div class="tab" onclick="switchTab('tukey',this)">Tukey / ANOVA</div>
 </nav>
 
 <main>
 
   <!-- TUKEY -->
-  <div class="panel active" id="panel-tukey">
+  <div class="panel" id="panel-tukey">
     <div class="controls">
       <div class="ctrl-group">
         <span class="ctrl-label">Parameter</span>
@@ -322,25 +305,13 @@ HTML = r"""<!DOCTYPE html>
   </div>
 
   <!-- REGRESSION -->
-  <div class="panel" id="panel-regression">
+  <div class="panel active" id="panel-regression">
     <div class="controls">
       <div class="ctrl-group">
         <span class="ctrl-label">Driver</span>
-        <select id="driver-select" onchange="onDriverChange()">
+        <select id="driver-select">
           <option value="">All Drivers</option>
         </select>
-      </div>
-      <!-- compound group: only visible when All Drivers is selected -->
-      <div id="compound-group" class="ctrl-divider-wrap" style="display:flex;align-items:center;gap:10px;">
-        <div class="ctrl-divider"></div>
-        <div class="ctrl-group">
-          <span class="ctrl-label">Tyre Compound</span>
-          <div class="tyre-group">
-            <button class="tyre-btn all active" onclick="setTyre('',this)">ALL</button>
-            <button class="tyre-btn soft"       onclick="setTyre('SOFT',this)">◉ SOFT</button>
-            <button class="tyre-btn medium"     onclick="setTyre('MEDIUM',this)">◉ MEDIUM</button>
-          </div>
-        </div>
       </div>
       <div class="ctrl-divider"></div>
       <button class="run-btn" onclick="loadRegression()">▶ PREDICT</button>
@@ -351,35 +322,12 @@ HTML = r"""<!DOCTYPE html>
 </main>
 
 <script>
-let activeCompound = '';
-
-function setTyre(val, el){
-  activeCompound = val;
-  document.querySelectorAll('.tyre-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-}
-
-function onDriverChange(){
-  const driver = document.getElementById('driver-select').value;
-  const cg = document.getElementById('compound-group');
-  if(driver === ''){
-    // All Drivers — show compound filter
-    cg.style.display = 'flex';
-  } else {
-    // Individual driver — hide compound filter, reset to ALL
-    cg.style.display = 'none';
-    activeCompound = '';
-    document.querySelectorAll('.tyre-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('.tyre-btn.all').classList.add('active');
-  }
-}
-
 function switchTab(name, el){
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('panel-' + name).classList.add('active');
-  if(name === 'regression' && !window._driversLoaded) loadDriverList();
+  if(name === 'tukey') { /* tukey loads on demand via param-select */ }
 }
 
 async function loadDriverList(){
@@ -424,19 +372,11 @@ async function loadTukey(){
 
 async function loadRegression(){
   const driver   = document.getElementById('driver-select').value;
-  // compound only applies when All Drivers; ignore it for individual drivers
-  const compound = (driver === '') ? activeCompound : '';
   const el       = document.getElementById('reg-content');
   el.innerHTML   = '<div class="loader">Running prediction model…</div>';
-  const url      = '/api/regression?driver=' + encodeURIComponent(driver) + '&compound=' + encodeURIComponent(compound);
+  const url      = '/api/regression?driver=' + encodeURIComponent(driver);
   const d        = await (await fetch(url)).json();
   if(d.error){ el.innerHTML = '<div class="err">' + d.error + '</div>'; return; }
-
-  const cLabel = compound === 'SOFT'
-    ? '<span class="cbadge soft">SOFT</span>'
-    : compound === 'MEDIUM'
-      ? '<span class="cbadge medium">MEDIUM</span>'
-      : '<span style="color:var(--muted)">ALL</span>';
 
   const predRows = d.preview.map(r => `<tr>
     <td><strong>${r.driver}</strong></td>
@@ -446,12 +386,12 @@ async function loadRegression(){
     <td style="font-family:monospace;color:${Math.abs(r.error) > 1 ? 'var(--accent)' : 'var(--green)'}">${r.error}</td>
   </tr>`).join('');
 
-  const isAll    = (driver === '' && compound === '');
+  const isAll    = (driver === '');
   const histHtml = isAll
     ? `<div class="card"><div class="sec">Error Distribution</div><img src="data:image/png;base64,${d.hist}"/></div>`
     : '';
   const wrapCls  = isAll ? 'two-col' : 'one-col';
-  const filterLabel = driver ? driver : (compound ? cLabel : 'All Drivers');
+  const filterLabel = driver ? driver : 'All Drivers';
 
   el.innerHTML = `
     <div class="metrics-row">
@@ -473,7 +413,8 @@ async function loadRegression(){
     </div>`;
 }
 
-loadTukey();
+loadDriverList();
+loadRegression();
 </script>
 </body>
 </html>"""
