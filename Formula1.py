@@ -17,8 +17,8 @@ TUKEY_FILES = {
     'AvgRPM':      'tukey_avgRPM.csv',
     'AvgThrottle': 'tukey_avgthrottle.csv',
     'MaxSpeed':    'tukey_maxspeed.csv',
-    'Sector1':     'tukey_sector1.csv',
-    'Sector2':     'tukey_sector2.csv',
+    'Sector1':     'tukey_sector2.csv',
+    'Sector2':     'tukey_sector3.csv',
 }
 
 HTML = r"""<!DOCTYPE html>
